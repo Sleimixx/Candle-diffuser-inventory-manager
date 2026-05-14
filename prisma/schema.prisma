@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------- Enums ----------
+
+enum JarSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+// 7 colors, each tied to a scent-line name (strict pairing model).
+enum LineColor {
+  PURPLE      // Lavender Bliss
+  LIGHT_BLUE  // Tranquil Jasmine
+  RED         // Vanilla Bourbon
+  GREEN       // Pine and Cinnamon
+  YELLOW      // Pomelo Paradise
+  GREY        // Sacred Oud
+  PINK        // Silk n Strawberry
+}
+
+enum WickType {
+  TYPE_1
+  TYPE_2
+}
+
+// ---------- Raw materials ----------
+
+model WaxType {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  stockGrams    Float          @default(0)
+  unitCostPerG  Float          @default(0)  // $ per gram
+  isOptional    Boolean        @default(false) // true for paraffin
+  recipeWaxes   RecipeWax[]
+  updatedAt     DateTime       @updatedAt
+}
+
+model Scent {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  stockMl       Float          @default(0)
+  unitCostPerMl Float          @default(0)
+  recipeScents  RecipeScent[]
+  updatedAt     DateTime       @updatedAt
+}
+
+model Wick {
+  id        String   @id @default(cuid())
+  type      WickType @unique
+  stockQty  Int      @default(0)
+  unitCost  Float    @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model WickSticker {
+  id        String   @id @default(cuid())
+  stockQty  Int      @default(0)
+  unitCost  Float    @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model Jar {
+  id        String    @id @default(cuid())
+  size      JarSize
+  color     LineColor
+  stockQty  Int       @default(0)
+  unitCost  Float     @default(0)
+  updatedAt DateTime  @updatedAt
+
+  @@unique([size, color])
+}
+
+model Sticker {
+  id        String    @id @default(cuid())
+  size      JarSize
+  color     LineColor
+  stockQty  Int       @default(0)
+  unitCost  Float     @default(0)
+  updatedAt DateTime  @updatedAt
+
+  @@unique([size, color])
+}
+
+// ---------- Recipes ----------
+
+// One recipe per (jarSize, color). Strict pairing: color = scent line,
+// jar color = sticker color = color.
+model CandleRecipe {
+  id          String        @id @default(cuid())
+  name        String        @unique // e.g. "Lavender Bliss - Medium"
+  jarSize     JarSize
+  color       LineColor
+  salePrice   Float         @default(0)
+  notes       String?
+  waxes       RecipeWax[]
+  scents      RecipeScent[]
+  productions ProductionRun[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([jarSize, color])
+}
+
+model RecipeWax {
+  id        String       @id @default(cuid())
+  recipe    CandleRecipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId  String
+  wax       WaxType      @relation(fields: [waxId], references: [id])
+  waxId     String
+  grams     Float
+
+  @@unique([recipeId, waxId])
+}
+
+model RecipeScent {
+  id        String       @id @default(cuid())
+  recipe    CandleRecipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId  String
+  scent     Scent        @relation(fields: [scentId], references: [id])
+  scentId   String
+  ml        Float
+
+  @@unique([recipeId, scentId])
+}
+
+// ---------- Operations ----------
+
+model ProductionRun {
+  id        String       @id @default(cuid())
+  recipe    CandleRecipe @relation(fields: [recipeId], references: [id])
+  recipeId  String
+  quantity  Int
+  // Cost snapshot at time of production so reports stay correct later.
+  cogsPerUnit Float
+  producedAt DateTime    @default(now())
+  sales     Sale[]
+}
+
+model Sale {
+  id             String        @id @default(cuid())
+  production     ProductionRun @relation(fields: [productionId], references: [id])
+  productionId   String
+  quantity       Int
+  unitPrice      Float
+  cogsPerUnit    Float          // snapshot from production
+  soldAt         DateTime      @default(now())
+}
+
+model StockAdjustment {
+  id        String   @id @default(cuid())
+  itemType  String   // "wax" | "scent" | "wick" | "wickSticker" | "jar" | "sticker"
+  itemId    String
+  delta     Float    // positive = restock, negative = correction
+  reason    String?
+  createdAt DateTime @default(now())
+}
