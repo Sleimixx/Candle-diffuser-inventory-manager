@@ -1,11 +1,9 @@
-import { PrismaClient, JarSize, LineColor, WickType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const COLORS: LineColor[] = [
-  "PURPLE", "LIGHT_BLUE", "RED", "GREEN", "YELLOW", "GREY", "PINK",
-];
-const SIZES: JarSize[] = ["SMALL", "MEDIUM", "LARGE"];
+const COLORS = ["PURPLE", "LIGHT_BLUE", "RED", "GREEN", "YELLOW", "GREY", "PINK"];
+const SIZES  = ["SMALL", "MEDIUM", "LARGE"];
 
 async function main() {
   // 5 wax types. Paraffin is optional in recipes.
@@ -25,7 +23,7 @@ async function main() {
   }
 
   // Wicks: 2 types
-  for (const t of ["TYPE_1", "TYPE_2"] as WickType[]) {
+  for (const t of ["TYPE_1", "TYPE_2"]) {
     await prisma.wick.upsert({
       where: { type: t },
       update: {},

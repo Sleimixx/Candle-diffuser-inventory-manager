@@ -1,6 +1,8 @@
-import { JarSize, LineColor, WickType } from "@prisma/client";
+// Domain types (SQLite schema uses String — these live here, not in @prisma/client)
+export type JarSize   = "SMALL" | "MEDIUM" | "LARGE";
+export type LineColor = "PURPLE" | "LIGHT_BLUE" | "RED" | "GREEN" | "YELLOW" | "GREY" | "PINK";
+export type WickType  = "TYPE_1" | "TYPE_2";
 
-// Strict pairing: each color is one of 7 candle product lines.
 export const COLOR_LINES: Record<LineColor, { color: string; line: string; hex: string }> = {
   PURPLE:     { color: "Purple",     line: "Lavender Bliss",      hex: "#a78bfa" },
   LIGHT_BLUE: { color: "Light Blue", line: "Tranquil Jasmine",    hex: "#7dd3fc" },

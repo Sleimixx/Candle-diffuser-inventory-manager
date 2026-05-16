@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { wickRuleFor } from "@/lib/constants";
-import { JarSize, LineColor } from "@prisma/client";
+import { JarSize, LineColor } from "@/lib/constants";
 
 // Returns the per-unit material cost for one candle of a recipe.
 // Looks up live prices on wax/scent/wick/jar/sticker rows.

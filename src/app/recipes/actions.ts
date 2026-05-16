@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { JarSize, LineColor } from "@prisma/client";
+import { JarSize, LineColor } from "@/lib/constants";
 
 function n(v: FormDataEntryValue | null, fallback = 0) {
   const x = parseFloat(String(v ?? ""));
