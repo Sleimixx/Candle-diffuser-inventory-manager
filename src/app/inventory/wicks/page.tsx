@@ -13,7 +13,8 @@ export default async function WicksPage() {
       <p className="text-xs text-gray-500">
         Production rules: Small jar uses 1 × Type 1; Medium uses 2 × Type 2; Large uses 3 × Type 2.
       </p>
-      <table className="w-full text-sm bg-white border rounded">
+      <div className="overflow-x-auto">
+      <table className="w-full text-sm bg-white border rounded min-w-[32rem]">
         <thead className="text-left text-gray-600 border-b">
           <tr>
             <th className="p-3">Wick</th>
@@ -43,6 +44,7 @@ export default async function WicksPage() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

@@ -10,7 +10,8 @@ export default async function WaxPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">Wax (grams)</h1>
-      <table className="w-full text-sm bg-white border rounded">
+      <div className="overflow-x-auto">
+      <table className="w-full text-sm bg-white border rounded min-w-[36rem]">
         <thead className="text-left text-gray-600 border-b">
           <tr>
             <th className="p-3">Wax</th>
@@ -55,6 +56,7 @@ export default async function WaxPage() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

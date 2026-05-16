@@ -26,7 +26,7 @@ export default async function RecipeForm({ existing }: { existing?: Existing }) 
     <form action={upsertRecipe} className="space-y-6 max-w-2xl">
       {existing?.id && <input type="hidden" name="id" value={existing.id} />}
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="text-sm">
           Name
           <input name="name" required defaultValue={existing?.name ?? ""} className="block w-full mt-1 border rounded px-2 py-1" />
@@ -55,7 +55,7 @@ export default async function RecipeForm({ existing }: { existing?: Existing }) 
 
       <fieldset className="border rounded p-3">
         <legend className="px-1 text-sm font-medium">Wax (grams per candle)</legend>
-        <div className="grid grid-cols-2 gap-2 mt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
           {waxes.map((w) => (
             <label key={w.id} className="text-sm flex items-center justify-between gap-2">
               <span>{w.name}{w.isOptional && <span className="text-xs text-gray-500"> (optional)</span>}</span>
@@ -76,7 +76,7 @@ export default async function RecipeForm({ existing }: { existing?: Existing }) 
         {scents.length === 0 ? (
           <p className="text-sm text-gray-500 mt-2">No scents yet. Add some on the Scents inventory page.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-2 mt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
             {scents.map((s) => (
               <label key={s.id} className="text-sm flex items-center justify-between gap-2">
                 <span>{s.name}</span>

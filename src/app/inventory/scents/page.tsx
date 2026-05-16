@@ -20,7 +20,8 @@ export default async function ScentsPage() {
         </form>
       </div>
 
-      <table className="w-full text-sm bg-white border rounded">
+      <div className="overflow-x-auto">
+      <table className="w-full text-sm bg-white border rounded min-w-[36rem]">
         <thead className="text-left text-gray-600 border-b">
           <tr>
             <th className="p-3">Scent</th>
@@ -57,6 +58,7 @@ export default async function ScentsPage() {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

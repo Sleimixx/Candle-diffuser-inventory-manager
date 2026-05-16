@@ -17,10 +17,10 @@ export default async function ProducePage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Produce candles</h1>
 
-      <form action={runProduction} className="rounded border bg-white p-4 flex gap-2 items-end">
+      <form action={runProduction} className="rounded border bg-white p-4 flex flex-wrap gap-3 items-end">
         <label className="text-sm">
           Recipe
-          <select name="recipeId" required className="block w-72 mt-1 border rounded px-2 py-1">
+          <select name="recipeId" required className="block w-full sm:w-72 mt-1 border rounded px-2 py-1">
             {recipes.length === 0 && <option value="">— no recipes —</option>}
             {recipes.map((r) => (
               <option key={r.id} value={r.id}>
@@ -40,7 +40,8 @@ export default async function ProducePage() {
 
       <div>
         <h2 className="text-lg font-medium mb-2">Recent runs</h2>
-        <table className="w-full text-sm bg-white border rounded">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm bg-white border rounded min-w-[36rem]">
           <thead className="text-left text-gray-600 border-b">
             <tr>
               <th className="p-3">When</th>
@@ -69,6 +70,7 @@ export default async function ProducePage() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

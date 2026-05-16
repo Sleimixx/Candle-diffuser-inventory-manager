@@ -21,7 +21,8 @@ export default async function RecipesPage() {
         <Link href="/recipes/new" className="px-3 py-2 rounded bg-black text-white text-sm">New recipe</Link>
       </div>
 
-      <table className="w-full text-sm bg-white border rounded">
+      <div className="overflow-x-auto">
+      <table className="w-full text-sm bg-white border rounded min-w-[40rem]">
         <thead className="text-left text-gray-600 border-b">
           <tr>
             <th className="p-3">Recipe</th>
@@ -66,6 +67,7 @@ export default async function RecipesPage() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

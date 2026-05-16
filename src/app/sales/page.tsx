@@ -34,7 +34,7 @@ export default async function SalesPage() {
           <form action={recordSale} className="flex flex-wrap gap-2 items-end">
             <label className="text-sm">
               From production
-              <select name="productionId" required className="block w-80 mt-1 border rounded px-2 py-1">
+              <select name="productionId" required className="block w-full sm:w-80 mt-1 border rounded px-2 py-1">
                 {available.map((r) => (
                   <option key={r.id} value={r.id}>
                     {r.recipe.name} — {SIZE_LABEL[r.recipe.jarSize]} {COLOR_LINES[r.recipe.color].line} ({r.quantity - r.sold} avail) — {new Date(r.producedAt).toLocaleDateString()}
@@ -57,7 +57,8 @@ export default async function SalesPage() {
 
       <div>
         <h2 className="text-lg font-medium mb-2">Recent sales</h2>
-        <table className="w-full text-sm bg-white border rounded">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm bg-white border rounded min-w-[40rem]">
           <thead className="text-left text-gray-600 border-b">
             <tr>
               <th className="p-3">When</th>
@@ -88,6 +89,7 @@ export default async function SalesPage() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

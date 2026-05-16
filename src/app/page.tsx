@@ -29,7 +29,7 @@ export default async function Dashboard() {
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
 
-      <section className="grid grid-cols-4 gap-4">
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Stat label="Revenue"    value={money(revenue)} />
         <Stat label="COGS"       value={money(cogs)} />
         <Stat label="Net income" value={money(profit)} />
@@ -38,7 +38,7 @@ export default async function Dashboard() {
 
       <section>
         <h2 className="text-lg font-medium mb-3">Low stock</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Card title="Waxes below 10 kg">
             {lowWax.length === 0 ? <Empty /> :
               <ul className="text-sm space-y-1">

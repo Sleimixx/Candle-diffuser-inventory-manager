@@ -12,7 +12,8 @@ export default async function JarsPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">Jars</h1>
-      <table className="w-full text-sm bg-white border rounded">
+      <div className="overflow-x-auto">
+      <table className="w-full text-sm bg-white border rounded min-w-[44rem]">
         <thead className="text-left text-gray-600 border-b">
           <tr>
             <th className="p-3">Color (Line)</th>
@@ -51,6 +52,7 @@ export default async function JarsPage() {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

@@ -4,6 +4,9 @@ const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      spacing: {
+        "18": "4.5rem",  // 72px — clears the 56px mobile top bar
+      },
       colors: {
         line: {
           purple: "#a78bfa",

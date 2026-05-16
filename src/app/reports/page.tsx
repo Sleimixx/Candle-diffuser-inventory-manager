@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { COLOR_LINES, SIZE_LABEL } from "@/lib/constants";
 import { money, num } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -43,13 +42,13 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Reports</h1>
 
-      <form className="rounded border bg-white p-3 flex gap-2 items-end">
+      <form className="rounded border bg-white p-3 flex flex-wrap gap-3 items-end">
         <label className="text-sm">From <input name="from" type="date" defaultValue={from.toISOString().slice(0, 10)} className="block border rounded px-2 py-1" /></label>
         <label className="text-sm">To   <input name="to"   type="date" defaultValue={to.toISOString().slice(0, 10)}   className="block border rounded px-2 py-1" /></label>
         <button className="px-3 py-1 rounded bg-black text-white text-sm">Filter</button>
       </form>
 
-      <section className="grid grid-cols-4 gap-3">
+      <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Stat label="Produced" value={`${num(produced)} candles`} />
         <Stat label="Sold"     value={`${num(soldQty)} candles`} />
         <Stat label="Revenue"  value={money(revenue)} />
@@ -58,7 +57,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
       <section>
         <h2 className="text-lg font-medium mb-2">By recipe</h2>
-        <table className="w-full text-sm bg-white border rounded">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm bg-white border rounded min-w-[28rem]">
           <thead className="text-left text-gray-600 border-b">
             <tr>
               <th className="p-3">Recipe</th>
@@ -81,6 +81,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             ))}
           </tbody>
         </table>
+        </div>
       </section>
     </div>
   );
