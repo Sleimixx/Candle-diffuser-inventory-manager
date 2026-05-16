@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { computeCogsForRecipe } from "@/lib/cogs";
-import { COLOR_LINES, SIZE_LABEL } from "@/lib/constants";
+import { colorLine, sizeLabel } from "@/lib/constants";
 import { money } from "@/lib/money";
 import { deleteRecipe } from "./actions";
 
@@ -48,11 +48,11 @@ export default async function RecipesPage() {
                 </td>
                 <td className="p-3">
                   <span className="inline-flex items-center gap-2">
-                    <span className="inline-block w-3 h-3 rounded-full" style={{ background: COLOR_LINES[r.color].hex }} />
-                    {COLOR_LINES[r.color].line}
+                    <span className="inline-block w-3 h-3 rounded-full" style={{ background: colorLine(r.color).hex }} />
+                    {colorLine(r.color).line}
                   </span>
                 </td>
-                <td className="p-3">{SIZE_LABEL[r.jarSize]}</td>
+                <td className="p-3">{sizeLabel(r.jarSize)}</td>
                 <td className="p-3">{money(r.salePrice)}</td>
                 <td className="p-3">{money(cost)}</td>
                 <td className={`p-3 ${margin < 0 ? "text-red-600" : ""}`}>{margin.toFixed(1)}%</td>

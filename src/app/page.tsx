@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { LOW_STOCK, SIZE_LABEL, COLOR_LINES } from "@/lib/constants";
+import { LOW_STOCK, sizeLabel, colorLine } from "@/lib/constants";
 import { money, num } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -72,7 +72,7 @@ export default async function Dashboard() {
               <ul className="text-sm space-y-1">
                 {lowJars.map((j) => (
                   <li key={j.id} className="flex justify-between">
-                    <span>{SIZE_LABEL[j.size]} {COLOR_LINES[j.color].color} — {COLOR_LINES[j.color].line}</span>
+                    <span>{sizeLabel(j.size)} {colorLine(j.color).color} — {colorLine(j.color).line}</span>
                     <span className="text-red-600">{j.stockQty} pcs</span>
                   </li>
                 ))}
@@ -83,7 +83,7 @@ export default async function Dashboard() {
               <ul className="text-sm space-y-1">
                 {lowStk.map((s) => (
                   <li key={s.id} className="flex justify-between">
-                    <span>{SIZE_LABEL[s.size]} {COLOR_LINES[s.color].color} — {COLOR_LINES[s.color].line}</span>
+                    <span>{sizeLabel(s.size)} {colorLine(s.color).color} — {colorLine(s.color).line}</span>
                     <span className="text-red-600">{s.stockQty} pcs</span>
                   </li>
                 ))}

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { updateWick } from "../actions";
-import { LOW_STOCK, WICK_LABEL } from "@/lib/constants";
+import { LOW_STOCK, wickLabel } from "@/lib/constants";
 import { money } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +28,7 @@ export default async function WicksPage() {
             const low = w.stockQty < LOW_STOCK.wickQty;
             return (
               <tr key={w.id} className="border-b last:border-0">
-                <td className="p-3">{WICK_LABEL[w.type]}</td>
+                <td className="p-3">{wickLabel(w.type)}</td>
                 <td className={`p-3 ${low ? "text-red-600" : ""}`}>{w.stockQty} pcs</td>
                 <td className="p-3">{money(w.unitCost)}</td>
                 <td className="p-3">

@@ -1,5 +1,7 @@
 import RecipeForm from "../RecipeForm";
 
+export const dynamic = "force-dynamic";
+
 export default function NewRecipePage() {
   return (
     <div className="space-y-4">

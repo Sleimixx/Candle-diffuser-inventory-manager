@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { recordSale } from "./actions";
-import { COLOR_LINES, SIZE_LABEL } from "@/lib/constants";
+import { colorLine, sizeLabel } from "@/lib/constants";
 import { money } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +37,7 @@ export default async function SalesPage() {
               <select name="productionId" required className="block w-full sm:w-80 mt-1 border rounded px-2 py-1">
                 {available.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {r.recipe.name} — {SIZE_LABEL[r.recipe.jarSize]} {COLOR_LINES[r.recipe.color].line} ({r.quantity - r.sold} avail) — {new Date(r.producedAt).toLocaleDateString()}
+                    {r.recipe.name} — {sizeLabel(r.recipe.jarSize)} {colorLine(r.recipe.color).line} ({r.quantity - r.sold} avail) — {new Date(r.producedAt).toLocaleDateString()}
                   </option>
                 ))}
               </select>

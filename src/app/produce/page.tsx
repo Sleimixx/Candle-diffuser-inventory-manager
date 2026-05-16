@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { runProduction } from "./actions";
-import { COLOR_LINES, SIZE_LABEL } from "@/lib/constants";
+import { colorLine, sizeLabel } from "@/lib/constants";
 import { money } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export default async function ProducePage() {
             {recipes.length === 0 && <option value="">— no recipes —</option>}
             {recipes.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.name} ({SIZE_LABEL[r.jarSize]} {COLOR_LINES[r.color].line})
+                {r.name} ({sizeLabel(r.jarSize)} {colorLine(r.color).line})
               </option>
             ))}
           </select>

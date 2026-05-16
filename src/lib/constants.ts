@@ -16,14 +16,17 @@ export const COLOR_LINES: Record<LineColor, { color: string; line: string; hex: 
 export const ALL_COLORS = Object.keys(COLOR_LINES) as LineColor[];
 export const ALL_SIZES: JarSize[] = ["SMALL", "MEDIUM", "LARGE"];
 
-// Hard-coded production rules.
-// Returns wick type and qty consumed per candle for a given jar size.
-// Wick sticker qty per candle equals wick qty.
-export function wickRuleFor(size: JarSize): { type: WickType; qty: number } {
-  switch (size) {
+// Prisma returns String fields — these helpers accept string and cast internally.
+export const colorLine = (c: string) => COLOR_LINES[c as LineColor];
+export const sizeLabel = (s: string) => SIZE_LABEL[s as JarSize];
+export const wickLabel = (t: string) => WICK_LABEL[t as WickType];
+
+export function wickRuleFor(size: string): { type: WickType; qty: number } {
+  switch (size as JarSize) {
     case "SMALL":  return { type: "TYPE_1", qty: 1 };
     case "MEDIUM": return { type: "TYPE_2", qty: 2 };
     case "LARGE":  return { type: "TYPE_2", qty: 3 };
+    default:       return { type: "TYPE_1", qty: 1 };
   }
 }
 
