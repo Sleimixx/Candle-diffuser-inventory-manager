@@ -41,15 +41,16 @@ npm install
 
 # 2. Configure Supabase / Postgres
 cp .env.example .env
-#   → set DATABASE_URL and DIRECT_URL
+#   → set DATABASE_URL, DIRECT_URL, and AUTH_SECRET (any long random string)
 
-# 3. Push schema & seed
-npm run db:push
-npm run db:seed
+# 3. Push schema
+npm run db:push   # v2 wipes any v1 test data — accept --accept-data-loss when prompted
 
 # 4. Run dev server
 npm run dev
 ```
+
+> **v2 note:** signup creates a per-user starter product structure (sizes, colors, wicks, wick rules). After deploying v2, sign up to start fresh — previous v1 test data is wiped by the schema change.
 
 Open http://localhost:3000.
 
