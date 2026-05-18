@@ -1,20 +1,22 @@
+import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { money, num } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
+  const user = await requireUser();
   const sp = await searchParams;
   const from = sp.from ? new Date(sp.from) : new Date(Date.now() - 30 * 86400000);
   const to   = sp.to   ? new Date(sp.to)   : new Date();
 
   const [sales, runs] = await Promise.all([
     prisma.sale.findMany({
-      where: { soldAt: { gte: from, lte: to } },
+      where: { userId: user.id, soldAt: { gte: from, lte: to } },
       include: { production: { include: { recipe: true } } },
     }),
     prisma.productionRun.findMany({
-      where: { producedAt: { gte: from, lte: to } },
+      where: { userId: user.id, producedAt: { gte: from, lte: to } },
       include: { recipe: true },
     }),
   ]);
@@ -26,7 +28,6 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const produced = runs.reduce((s, r) => s + r.quantity, 0);
   const soldQty  = sales.reduce((s, x) => s + x.quantity, 0);
 
-  // Per-recipe breakdown
   const perRecipe = new Map<string, { name: string; revenue: number; cogs: number; qty: number }>();
   for (const s of sales) {
     const k = s.production.recipeId;

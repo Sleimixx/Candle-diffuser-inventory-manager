@@ -1,17 +1,20 @@
+import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { recordSale } from "./actions";
-import { colorLine, sizeLabel } from "@/lib/constants";
 import { money } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
 export default async function SalesPage() {
+  const user = await requireUser();
   const [runs, sales] = await Promise.all([
     prisma.productionRun.findMany({
+      where: { userId: user.id },
       orderBy: { producedAt: "desc" },
-      include: { recipe: true, sales: true },
+      include: { recipe: { include: { size: true, color: true } }, sales: true },
     }),
     prisma.sale.findMany({
+      where: { userId: user.id },
       orderBy: { soldAt: "desc" },
       include: { production: { include: { recipe: true } } },
       take: 50,
@@ -37,7 +40,7 @@ export default async function SalesPage() {
               <select name="productionId" required className="block w-full sm:w-80 mt-1 border rounded px-2 py-1">
                 {available.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {r.recipe.name} — {sizeLabel(r.recipe.jarSize)} {colorLine(r.recipe.color).line} ({r.quantity - r.sold} avail) — {new Date(r.producedAt).toLocaleDateString()}
+                    {r.recipe.name} — {r.recipe.size.name} {r.recipe.color.scentLine ?? r.recipe.color.name} ({r.quantity - r.sold} avail) — {new Date(r.producedAt).toLocaleDateString()}
                   </option>
                 ))}
               </select>

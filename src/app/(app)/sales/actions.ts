@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireUser } from "@/lib/auth";
 
 function n(v: FormDataEntryValue | null, fallback = 0) {
   const x = parseFloat(String(v ?? ""));
@@ -9,6 +10,7 @@ function n(v: FormDataEntryValue | null, fallback = 0) {
 }
 
 export async function recordSale(formData: FormData) {
+  const user = await requireUser();
   const productionId = String(formData.get("productionId"));
   const quantity     = Math.max(1, Math.trunc(n(formData.get("quantity"))));
   const unitPrice    = n(formData.get("unitPrice"));
@@ -16,8 +18,8 @@ export async function recordSale(formData: FormData) {
   if (!productionId || !quantity) throw new Error("Missing fields.");
 
   await prisma.$transaction(async (tx) => {
-    const run = await tx.productionRun.findUnique({
-      where: { id: productionId },
+    const run = await tx.productionRun.findFirst({
+      where: { id: productionId, userId: user.id },
       include: { sales: true },
     });
     if (!run) throw new Error("Production run not found");
@@ -27,7 +29,8 @@ export async function recordSale(formData: FormData) {
 
     await tx.sale.create({
       data: {
-        productionId,
+        userId: user.id,
+        productionId: run.id,
         quantity,
         unitPrice,
         cogsPerUnit: run.cogsPerUnit,

@@ -1,17 +1,19 @@
+import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { LOW_STOCK, sizeLabel, colorLine } from "@/lib/constants";
+import { LOW_STOCK } from "@/lib/constants";
 import { money, num } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
+  const user = await requireUser();
   const [waxes, jars, stickers, wicks, wickSticker, sales] = await Promise.all([
-    prisma.waxType.findMany(),
-    prisma.jar.findMany(),
-    prisma.sticker.findMany(),
-    prisma.wick.findMany(),
-    prisma.wickSticker.findFirst(),
-    prisma.sale.findMany(),
+    prisma.waxType.findMany({ where: { userId: user.id } }),
+    prisma.jar.findMany({ where: { userId: user.id }, include: { size: true, color: true } }),
+    prisma.sticker.findMany({ where: { userId: user.id }, include: { size: true, color: true } }),
+    prisma.wick.findMany({ where: { userId: user.id } }),
+    prisma.wickSticker.findUnique({ where: { userId: user.id } }),
+    prisma.sale.findMany({ where: { userId: user.id } }),
   ]);
 
   const revenue = sales.reduce((s, x) => s + x.quantity * x.unitPrice, 0);
@@ -55,7 +57,7 @@ export default async function Dashboard() {
               <ul className="text-sm space-y-1">
                 {lowWicks.map((w) => (
                   <li key={w.id} className="flex justify-between">
-                    <span>{w.type.replace("_", " ")}</span>
+                    <span>{w.name}</span>
                     <span className="text-red-600">{w.stockQty} pcs</span>
                   </li>
                 ))}
@@ -72,7 +74,7 @@ export default async function Dashboard() {
               <ul className="text-sm space-y-1">
                 {lowJars.map((j) => (
                   <li key={j.id} className="flex justify-between">
-                    <span>{sizeLabel(j.size)} {colorLine(j.color).color} — {colorLine(j.color).line}</span>
+                    <span>{j.size.name} {j.color.name}{j.color.scentLine ? ` — ${j.color.scentLine}` : ""}</span>
                     <span className="text-red-600">{j.stockQty} pcs</span>
                   </li>
                 ))}
@@ -83,7 +85,7 @@ export default async function Dashboard() {
               <ul className="text-sm space-y-1">
                 {lowStk.map((s) => (
                   <li key={s.id} className="flex justify-between">
-                    <span>{sizeLabel(s.size)} {colorLine(s.color).color} — {colorLine(s.color).line}</span>
+                    <span>{s.size.name} {s.color.name}{s.color.scentLine ? ` — ${s.color.scentLine}` : ""}</span>
                     <span className="text-red-600">{s.stockQty} pcs</span>
                   </li>
                 ))}

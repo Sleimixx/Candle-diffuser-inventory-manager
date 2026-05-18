@@ -1,3 +1,4 @@
+import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import RecipeForm from "../RecipeForm";
@@ -7,13 +8,14 @@ import { money } from "@/lib/money";
 export const dynamic = "force-dynamic";
 
 export default async function EditRecipePage({ params }: { params: Promise<{ id: string }> }) {
+  const user = await requireUser();
   const { id } = await params;
-  const r = await prisma.candleRecipe.findUnique({
-    where: { id },
+  const r = await prisma.candleRecipe.findFirst({
+    where: { id, userId: user.id },
     include: { waxes: true, scents: true },
   });
   if (!r) return notFound();
-  const cost = await computeCogsForRecipe(r.id);
+  const cost = await computeCogsForRecipe(user.id, r.id);
 
   return (
     <div className="space-y-4">
@@ -25,8 +27,8 @@ export default async function EditRecipePage({ params }: { params: Promise<{ id:
         existing={{
           id: r.id,
           name: r.name,
-          jarSize: r.jarSize,
-          color: r.color,
+          sizeId: r.sizeId,
+          colorId: r.colorId,
           salePrice: r.salePrice,
           notes: r.notes,
           waxes:  r.waxes.map((w) => ({ waxId: w.waxId, grams: w.grams })),

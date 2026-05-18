@@ -1,18 +1,21 @@
+import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { computeCogsForRecipe } from "@/lib/cogs";
-import { colorLine, sizeLabel } from "@/lib/constants";
 import { money } from "@/lib/money";
 import { deleteRecipe } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function RecipesPage() {
+  const user = await requireUser();
   const recipes = await prisma.candleRecipe.findMany({
-    orderBy: [{ color: "asc" }, { jarSize: "asc" }],
+    where: { userId: user.id },
+    orderBy: [{ name: "asc" }],
+    include: { size: true, color: true },
   });
 
-  const costs = await Promise.all(recipes.map((r) => computeCogsForRecipe(r.id)));
+  const costs = await Promise.all(recipes.map((r) => computeCogsForRecipe(user.id, r.id)));
 
   return (
     <div className="space-y-4">
@@ -48,11 +51,11 @@ export default async function RecipesPage() {
                 </td>
                 <td className="p-3">
                   <span className="inline-flex items-center gap-2">
-                    <span className="inline-block w-3 h-3 rounded-full" style={{ background: colorLine(r.color).hex }} />
-                    {colorLine(r.color).line}
+                    <span className="inline-block w-3 h-3 rounded-full" style={{ background: r.color.hex }} />
+                    {r.color.scentLine ?? r.color.name}
                   </span>
                 </td>
-                <td className="p-3">{sizeLabel(r.jarSize)}</td>
+                <td className="p-3">{r.size.name}</td>
                 <td className="p-3">{money(r.salePrice)}</td>
                 <td className="p-3">{money(cost)}</td>
                 <td className={`p-3 ${margin < 0 ? "text-red-600" : ""}`}>{margin.toFixed(1)}%</td>

@@ -1,13 +1,19 @@
+import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { runProduction } from "./actions";
-import { colorLine, sizeLabel } from "@/lib/constants";
 import { money } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProducePage() {
-  const recipes = await prisma.candleRecipe.findMany({ orderBy: [{ color: "asc" }, { jarSize: "asc" }] });
+  const user = await requireUser();
+  const recipes = await prisma.candleRecipe.findMany({
+    where: { userId: user.id },
+    orderBy: [{ name: "asc" }],
+    include: { size: true, color: true },
+  });
   const runs = await prisma.productionRun.findMany({
+    where: { userId: user.id },
     orderBy: { producedAt: "desc" },
     include: { recipe: true, sales: true },
     take: 25,
@@ -24,7 +30,7 @@ export default async function ProducePage() {
             {recipes.length === 0 && <option value="">— no recipes —</option>}
             {recipes.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.name} ({sizeLabel(r.jarSize)} {colorLine(r.color).line})
+                {r.name} ({r.size.name} {r.color.scentLine ?? r.color.name})
               </option>
             ))}
           </select>
