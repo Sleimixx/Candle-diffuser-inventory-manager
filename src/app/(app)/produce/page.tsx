@@ -7,10 +7,9 @@ export const dynamic = "force-dynamic";
 
 export default async function ProducePage() {
   const user = await requireUser();
-  const recipes = await prisma.candleRecipe.findMany({
+  const recipes = await prisma.recipe.findMany({
     where: { userId: user.id },
     orderBy: [{ name: "asc" }],
-    include: { jar: true, sticker: true },
   });
   const runs = await prisma.productionRun.findMany({
     where: { userId: user.id },
@@ -21,7 +20,7 @@ export default async function ProducePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Produce candles</h1>
+      <h1 className="text-2xl font-semibold">Produce</h1>
 
       <form action={runProduction} className="rounded border bg-white p-4 flex flex-wrap gap-3 items-end">
         <label className="text-sm">
@@ -29,9 +28,7 @@ export default async function ProducePage() {
           <select name="recipeId" required className="block w-full sm:w-72 mt-1 border rounded px-2 py-1">
             {recipes.length === 0 && <option value="">— no recipes —</option>}
             {recipes.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name} ({r.jar.name} / {r.sticker.name})
-              </option>
+              <option key={r.id} value={r.id}>{r.name}</option>
             ))}
           </select>
         </label>

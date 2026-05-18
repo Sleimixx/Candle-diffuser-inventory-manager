@@ -11,7 +11,7 @@ export default async function SalesPage() {
     prisma.productionRun.findMany({
       where: { userId: user.id },
       orderBy: { producedAt: "desc" },
-      include: { recipe: { include: { jar: true, sticker: true } }, sales: true },
+      include: { recipe: true, sales: true },
     }),
     prisma.sale.findMany({
       where: { userId: user.id },
@@ -40,7 +40,7 @@ export default async function SalesPage() {
               <select name="productionId" required className="block w-full sm:w-80 mt-1 border rounded px-2 py-1">
                 {available.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {r.recipe.name} — {r.recipe.jar.name} / {r.recipe.sticker.name} ({r.quantity - r.sold} avail) — {new Date(r.producedAt).toLocaleDateString()}
+                    {r.recipe.name} ({r.quantity - r.sold} avail) — {new Date(r.producedAt).toLocaleDateString()}
                   </option>
                 ))}
               </select>

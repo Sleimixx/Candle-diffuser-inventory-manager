@@ -17,99 +17,53 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
 
-  waxTypes     WaxType[]
-  scents       Scent[]
-  wicks        Wick[]
-  jars         Jar[]
-  stickers     Sticker[]
-  recipes      CandleRecipe[]
+  categories   Category[]
+  items        Item[]
+  recipes      Recipe[]
   productions  ProductionRun[]
   sales        Sale[]
   adjustments  StockAdjustment[]
 }
 
-// ---------- Raw materials (all user-scoped) ----------
+// ---------- Inventory ----------
 
-model WaxType {
-  id           String      @id @default(cuid())
-  userId       String
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name         String
-  stockGrams   Float       @default(0)
-  unitCostPerG Float       @default(0)
-  isOptional   Boolean     @default(false)
-  recipeWaxes  RecipeWax[]
-  updatedAt    DateTime    @updatedAt
-
-  @@unique([userId, name])
-}
-
-model Scent {
-  id            String        @id @default(cuid())
-  userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name          String
-  stockMl       Float         @default(0)
-  unitCostPerMl Float         @default(0)
-  recipeScents  RecipeScent[]
-  updatedAt     DateTime      @updatedAt
-
-  @@unique([userId, name])
-}
-
-model Wick {
-  id        String   @id @default(cuid())
+model Category {
+  id        String @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   name      String
-  stockQty  Int      @default(0)
-  unitCost  Float    @default(0)
-  updatedAt DateTime @updatedAt
+  unit      String @default("pcs")
+  sortOrder Int    @default(0)
+  items     Item[]
 
   @@unique([userId, name])
 }
 
-model Jar {
-  id        String         @id @default(cuid())
-  userId    String
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  stockQty  Int            @default(0)
-  unitCost  Float          @default(0)
-  recipes   CandleRecipe[]
-  updatedAt DateTime       @updatedAt
+model Item {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  name        String
+  stock       Float        @default(0)
+  unitCost    Float        @default(0)
+  recipeItems RecipeItem[]
+  updatedAt   DateTime     @updatedAt
 
-  @@unique([userId, name])
-}
-
-model Sticker {
-  id        String         @id @default(cuid())
-  userId    String
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  stockQty  Int            @default(0)
-  unitCost  Float          @default(0)
-  recipes   CandleRecipe[]
-  updatedAt DateTime       @updatedAt
-
-  @@unique([userId, name])
+  @@unique([userId, categoryId, name])
 }
 
 // ---------- Recipes ----------
 
-model CandleRecipe {
+model Recipe {
   id          String          @id @default(cuid())
   userId      String
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   name        String
-  jarId       String
-  jar         Jar             @relation(fields: [jarId], references: [id], onDelete: Restrict)
-  stickerId   String
-  sticker     Sticker         @relation(fields: [stickerId], references: [id], onDelete: Restrict)
   salePrice   Float           @default(0)
   notes       String?
-  waxes       RecipeWax[]
-  scents      RecipeScent[]
+  items       RecipeItem[]
   productions ProductionRun[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
@@ -117,39 +71,28 @@ model CandleRecipe {
   @@unique([userId, name])
 }
 
-model RecipeWax {
-  id       String       @id @default(cuid())
-  recipe   CandleRecipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+model RecipeItem {
+  id       String @id @default(cuid())
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   recipeId String
-  wax      WaxType      @relation(fields: [waxId], references: [id], onDelete: Restrict)
-  waxId    String
-  grams    Float
+  item     Item   @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  itemId   String
+  qty      Float
 
-  @@unique([recipeId, waxId])
-}
-
-model RecipeScent {
-  id       String       @id @default(cuid())
-  recipe   CandleRecipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  recipeId String
-  scent    Scent        @relation(fields: [scentId], references: [id], onDelete: Restrict)
-  scentId  String
-  ml       Float
-
-  @@unique([recipeId, scentId])
+  @@unique([recipeId, itemId])
 }
 
 // ---------- Operations ----------
 
 model ProductionRun {
-  id          String       @id @default(cuid())
+  id          String   @id @default(cuid())
   userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipe      CandleRecipe @relation(fields: [recipeId], references: [id], onDelete: Restrict)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Restrict)
   recipeId    String
   quantity    Int
   cogsPerUnit Float
-  producedAt  DateTime     @default(now())
+  producedAt  DateTime @default(now())
   sales       Sale[]
 }
 
@@ -169,7 +112,6 @@ model StockAdjustment {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  itemType  String
   itemId    String
   delta     Float
   reason    String?

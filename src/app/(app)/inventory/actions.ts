@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 
 function n(v: FormDataEntryValue | null, fallback = 0) {
@@ -9,212 +10,88 @@ function n(v: FormDataEntryValue | null, fallback = 0) {
   return Number.isFinite(x) ? x : fallback;
 }
 
-async function ownsOrThrow<T>(row: T | null, label: string): Promise<T> {
-  if (!row) throw new Error(`${label} not found.`);
-  return row;
-}
+// ---------- Categories ----------
 
-export async function createWax(formData: FormData) {
+export async function createCategory(formData: FormData) {
   const user = await requireUser();
   const name = String(formData.get("name") || "").trim();
+  const unit = String(formData.get("unit") || "pcs").trim() || "pcs";
   if (!name) return;
-  const isOptional = formData.get("isOptional") === "on";
-  await prisma.waxType.create({
-    data: {
-      userId: user.id,
-      name,
-      isOptional,
-      unitCostPerG: n(formData.get("unitCostPerG")),
-      stockGrams:   n(formData.get("stockGrams")),
-    },
-  });
-  revalidatePath("/inventory/wax");
+  await prisma.category.create({ data: { userId: user.id, name, unit } });
+  revalidatePath("/inventory");
 }
 
-export async function updateWax(formData: FormData) {
-  const user = await requireUser();
-  const id   = String(formData.get("id"));
-  const cost = n(formData.get("unitCostPerG"));
-  const add  = n(formData.get("addGrams"));
-  await prisma.$transaction(async (tx) => {
-    const existing = await ownsOrThrow(await tx.waxType.findFirst({ where: { id, userId: user.id } }), "Wax");
-    await tx.waxType.update({ where: { id: existing.id }, data: { unitCostPerG: cost } });
-    if (add !== 0) {
-      await tx.waxType.update({ where: { id: existing.id }, data: { stockGrams: { increment: add } } });
-      await tx.stockAdjustment.create({ data: { userId: user.id, itemType: "wax", itemId: existing.id, delta: add, reason: "restock" } });
-    }
-  });
-  revalidatePath("/inventory/wax");
-}
-
-export async function deleteWax(formData: FormData) {
+export async function updateCategory(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id"));
-  const wax = await ownsOrThrow(await prisma.waxType.findFirst({ where: { id, userId: user.id } }), "Wax");
-  const used = await prisma.recipeWax.count({ where: { waxId: wax.id } });
-  if (used > 0) throw new Error("Wax is used by a recipe.");
-  await prisma.waxType.delete({ where: { id: wax.id } });
-  revalidatePath("/inventory/wax");
-}
-
-export async function createScent(formData: FormData) {
-  const user = await requireUser();
   const name = String(formData.get("name") || "").trim();
-  if (!name) return;
-  await prisma.scent.create({
-    data: {
-      userId: user.id,
-      name,
-      unitCostPerMl: n(formData.get("unitCostPerMl")),
-      stockMl:       n(formData.get("stockMl")),
-    },
-  });
-  revalidatePath("/inventory/scents");
+  const unit = String(formData.get("unit") || "pcs").trim() || "pcs";
+  if (!name) throw new Error("Name required.");
+  const existing = await prisma.category.findFirst({ where: { id, userId: user.id } });
+  if (!existing) throw new Error("Category not found.");
+  await prisma.category.update({ where: { id: existing.id }, data: { name, unit } });
+  revalidatePath("/inventory");
+  revalidatePath(`/inventory/${id}`);
 }
 
-export async function updateScent(formData: FormData) {
-  const user = await requireUser();
-  const id   = String(formData.get("id"));
-  const cost = n(formData.get("unitCostPerMl"));
-  const add  = n(formData.get("addMl"));
-  await prisma.$transaction(async (tx) => {
-    const existing = await ownsOrThrow(await tx.scent.findFirst({ where: { id, userId: user.id } }), "Scent");
-    await tx.scent.update({ where: { id: existing.id }, data: { unitCostPerMl: cost } });
-    if (add !== 0) {
-      await tx.scent.update({ where: { id: existing.id }, data: { stockMl: { increment: add } } });
-      await tx.stockAdjustment.create({ data: { userId: user.id, itemType: "scent", itemId: existing.id, delta: add, reason: "restock" } });
-    }
-  });
-  revalidatePath("/inventory/scents");
-}
-
-export async function deleteScent(formData: FormData) {
+export async function deleteCategory(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id"));
-  const scent = await ownsOrThrow(await prisma.scent.findFirst({ where: { id, userId: user.id } }), "Scent");
-  const used = await prisma.recipeScent.count({ where: { scentId: scent.id } });
-  if (used > 0) throw new Error("Scent is in use by a recipe.");
-  await prisma.scent.delete({ where: { id: scent.id } });
-  revalidatePath("/inventory/scents");
+  const existing = await prisma.category.findFirst({ where: { id, userId: user.id } });
+  if (!existing) throw new Error("Category not found.");
+  const itemCount = await prisma.item.count({ where: { categoryId: existing.id } });
+  if (itemCount > 0) throw new Error("Category has items. Delete or move them first.");
+  await prisma.category.delete({ where: { id: existing.id } });
+  revalidatePath("/inventory");
+  redirect("/inventory");
 }
 
-export async function createWick(formData: FormData) {
+// ---------- Items ----------
+
+export async function createItem(formData: FormData) {
   const user = await requireUser();
+  const categoryId = String(formData.get("categoryId"));
   const name = String(formData.get("name") || "").trim();
   if (!name) return;
-  await prisma.wick.create({
+  const category = await prisma.category.findFirst({ where: { id: categoryId, userId: user.id } });
+  if (!category) throw new Error("Category not found.");
+  await prisma.item.create({
     data: {
       userId: user.id,
+      categoryId,
       name,
       unitCost: n(formData.get("unitCost")),
-      stockQty: Math.trunc(n(formData.get("stockQty"))),
+      stock: n(formData.get("stock")),
     },
   });
-  revalidatePath("/inventory/wicks");
+  revalidatePath(`/inventory/${categoryId}`);
 }
 
-export async function updateWick(formData: FormData) {
-  const user = await requireUser();
-  const id   = String(formData.get("id"));
-  const cost = n(formData.get("unitCost"));
-  const add  = Math.trunc(n(formData.get("addQty")));
-  await prisma.$transaction(async (tx) => {
-    const existing = await ownsOrThrow(await tx.wick.findFirst({ where: { id, userId: user.id } }), "Wick");
-    await tx.wick.update({ where: { id: existing.id }, data: { unitCost: cost } });
-    if (add !== 0) {
-      await tx.wick.update({ where: { id: existing.id }, data: { stockQty: { increment: add } } });
-      await tx.stockAdjustment.create({ data: { userId: user.id, itemType: "wick", itemId: existing.id, delta: add, reason: "restock" } });
-    }
-  });
-  revalidatePath("/inventory/wicks");
-}
-
-export async function deleteWick(formData: FormData) {
+export async function updateItem(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id"));
-  const wick = await ownsOrThrow(await prisma.wick.findFirst({ where: { id, userId: user.id } }), "Wick");
-  await prisma.wick.delete({ where: { id: wick.id } });
-  revalidatePath("/inventory/wicks");
-}
-
-export async function createJar(formData: FormData) {
-  const user = await requireUser();
-  const name = String(formData.get("name") || "").trim();
-  if (!name) return;
-  await prisma.jar.create({
-    data: {
-      userId: user.id,
-      name,
-      unitCost: n(formData.get("unitCost")),
-      stockQty: Math.trunc(n(formData.get("stockQty"))),
-    },
-  });
-  revalidatePath("/inventory/jars");
-}
-
-export async function updateJar(formData: FormData) {
-  const user = await requireUser();
-  const id   = String(formData.get("id"));
   const cost = n(formData.get("unitCost"));
-  const add  = Math.trunc(n(formData.get("addQty")));
+  const add  = n(formData.get("addStock"));
   await prisma.$transaction(async (tx) => {
-    const existing = await ownsOrThrow(await tx.jar.findFirst({ where: { id, userId: user.id } }), "Jar");
-    await tx.jar.update({ where: { id: existing.id }, data: { unitCost: cost } });
+    const existing = await tx.item.findFirst({ where: { id, userId: user.id } });
+    if (!existing) throw new Error("Item not found.");
+    await tx.item.update({ where: { id: existing.id }, data: { unitCost: cost } });
     if (add !== 0) {
-      await tx.jar.update({ where: { id: existing.id }, data: { stockQty: { increment: add } } });
-      await tx.stockAdjustment.create({ data: { userId: user.id, itemType: "jar", itemId: existing.id, delta: add, reason: "restock" } });
+      await tx.item.update({ where: { id: existing.id }, data: { stock: { increment: add } } });
+      await tx.stockAdjustment.create({ data: { userId: user.id, itemId: existing.id, delta: add, reason: "restock" } });
     }
   });
-  revalidatePath("/inventory/jars");
+  const item = await prisma.item.findUnique({ where: { id } });
+  if (item) revalidatePath(`/inventory/${item.categoryId}`);
 }
 
-export async function deleteJar(formData: FormData) {
+export async function deleteItem(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id"));
-  const jar = await ownsOrThrow(await prisma.jar.findFirst({ where: { id, userId: user.id } }), "Jar");
-  const used = await prisma.candleRecipe.count({ where: { jarId: jar.id } });
-  if (used > 0) throw new Error("Jar is used by a recipe.");
-  await prisma.jar.delete({ where: { id: jar.id } });
-  revalidatePath("/inventory/jars");
-}
-
-export async function createSticker(formData: FormData) {
-  const user = await requireUser();
-  const name = String(formData.get("name") || "").trim();
-  if (!name) return;
-  await prisma.sticker.create({
-    data: {
-      userId: user.id,
-      name,
-      unitCost: n(formData.get("unitCost")),
-      stockQty: Math.trunc(n(formData.get("stockQty"))),
-    },
-  });
-  revalidatePath("/inventory/stickers");
-}
-
-export async function updateSticker(formData: FormData) {
-  const user = await requireUser();
-  const id   = String(formData.get("id"));
-  const cost = n(formData.get("unitCost"));
-  const add  = Math.trunc(n(formData.get("addQty")));
-  await prisma.$transaction(async (tx) => {
-    const existing = await ownsOrThrow(await tx.sticker.findFirst({ where: { id, userId: user.id } }), "Sticker");
-    await tx.sticker.update({ where: { id: existing.id }, data: { unitCost: cost } });
-    if (add !== 0) {
-      await tx.sticker.update({ where: { id: existing.id }, data: { stockQty: { increment: add } } });
-      await tx.stockAdjustment.create({ data: { userId: user.id, itemType: "sticker", itemId: existing.id, delta: add, reason: "restock" } });
-    }
-  });
-  revalidatePath("/inventory/stickers");
-}
-
-export async function deleteSticker(formData: FormData) {
-  const user = await requireUser();
-  const id = String(formData.get("id"));
-  const sticker = await ownsOrThrow(await prisma.sticker.findFirst({ where: { id, userId: user.id } }), "Sticker");
-  const used = await prisma.candleRecipe.count({ where: { stickerId: sticker.id } });
-  if (used > 0) throw new Error("Sticker is used by a recipe.");
-  await prisma.sticker.delete({ where: { id: sticker.id } });
-  revalidatePath("/inventory/stickers");
+  const item = await prisma.item.findFirst({ where: { id, userId: user.id } });
+  if (!item) throw new Error("Item not found.");
+  const used = await prisma.recipeItem.count({ where: { itemId: item.id } });
+  if (used > 0) throw new Error("Item is used by a recipe.");
+  await prisma.item.delete({ where: { id: item.id } });
+  revalidatePath(`/inventory/${item.categoryId}`);
 }

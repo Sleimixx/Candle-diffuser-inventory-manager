@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 export default async function EditRecipePage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
   const { id } = await params;
-  const r = await prisma.candleRecipe.findFirst({
+  const r = await prisma.recipe.findFirst({
     where: { id, userId: user.id },
-    include: { waxes: true, scents: true },
+    include: { items: true },
   });
   if (!r) return notFound();
   const cost = await computeCogsForRecipe(user.id, r.id);
@@ -27,12 +27,9 @@ export default async function EditRecipePage({ params }: { params: Promise<{ id:
         existing={{
           id: r.id,
           name: r.name,
-          jarId: r.jarId,
-          stickerId: r.stickerId,
           salePrice: r.salePrice,
           notes: r.notes,
-          waxes:  r.waxes.map((w) => ({ waxId: w.waxId, grams: w.grams })),
-          scents: r.scents.map((s) => ({ scentId: s.scentId, ml: s.ml })),
+          items: r.items.map((x) => ({ itemId: x.itemId, qty: x.qty })),
         }}
       />
     </div>
