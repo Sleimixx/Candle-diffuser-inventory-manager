@@ -38,37 +38,35 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
       data: { username, email, passwordHash },
     });
 
-    const sizes = await Promise.all(
-      DEFAULT_SIZES.map((s) =>
-        tx.jarSize.create({ data: { userId: user.id, name: s.name, sortOrder: s.sortOrder } })
-      )
-    );
-    await Promise.all(
-      DEFAULT_COLORS.map((c) =>
-        tx.jarColor.create({ data: { userId: user.id, name: c.name, hex: c.hex, scentLine: c.scentLine } })
-      )
-    );
-    const wicks = await Promise.all(
-      DEFAULT_WICKS.map((w) =>
-        tx.wick.create({ data: { userId: user.id, name: w.name } })
-      )
-    );
+    await tx.jarSize.createMany({
+      data: DEFAULT_SIZES.map((s) => ({ userId: user.id, name: s.name, sortOrder: s.sortOrder })),
+    });
+    await tx.jarColor.createMany({
+      data: DEFAULT_COLORS.map((c) => ({ userId: user.id, name: c.name, hex: c.hex, scentLine: c.scentLine })),
+    });
+    await tx.wick.createMany({
+      data: DEFAULT_WICKS.map((w) => ({ userId: user.id, name: w.name })),
+    });
+
+    const [sizes, wicks] = await Promise.all([
+      tx.jarSize.findMany({ where: { userId: user.id } }),
+      tx.wick.findMany({ where: { userId: user.id } }),
+    ]);
     const sizeByName = new Map(sizes.map((s) => [s.name, s.id]));
     const wickByName = new Map(wicks.map((w) => [w.name, w.id]));
-    for (const r of DEFAULT_WICK_RULES) {
-      await tx.wickRule.create({
-        data: {
-          userId: user.id,
-          sizeId: sizeByName.get(r.sizeName)!,
-          wickId: wickByName.get(r.wickName)!,
-          qty: r.qty,
-        },
-      });
-    }
+
+    await tx.wickRule.createMany({
+      data: DEFAULT_WICK_RULES.map((r) => ({
+        userId: user.id,
+        sizeId: sizeByName.get(r.sizeName)!,
+        wickId: wickByName.get(r.wickName)!,
+        qty: r.qty,
+      })),
+    });
     await tx.wickSticker.create({ data: { userId: user.id } });
 
     return user.id;
-  });
+  }, { timeout: 30000, maxWait: 10000 });
 
   await createSession(userId);
   redirect("/");
