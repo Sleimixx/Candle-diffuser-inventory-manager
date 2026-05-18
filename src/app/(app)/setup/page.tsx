@@ -1,9 +1,8 @@
 import Link from "next/link";
 
 const TABS = [
-  { href: "/setup/sizes",      label: "Jar sizes",   desc: "Define the jar sizes you carry (Small, Medium, Large, etc.)." },
-  { href: "/setup/colors",     label: "Colors",      desc: "Define each color and its scent line label." },
-  { href: "/setup/wick-rules", label: "Wick rules",  desc: "Map each jar size to a wick type and quantity." },
+  { href: "/setup/sizes",  label: "Jar sizes", desc: "Define the jar sizes you carry (Small, Medium, Large, etc.)." },
+  { href: "/setup/colors", label: "Colors",    desc: "Define each color and its scent line label." },
 ];
 
 export default function SetupHome() {
@@ -13,7 +12,7 @@ export default function SetupHome() {
       <p className="text-sm text-gray-600">
         Customize the product structure for your shop. Existing recipes, jars, and stickers reference these.
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {TABS.map((t) => (
           <Link key={t.href} href={t.href} className="block rounded border bg-white p-4 hover:bg-gray-50">
             <div className="font-medium text-sm">{t.label}</div>

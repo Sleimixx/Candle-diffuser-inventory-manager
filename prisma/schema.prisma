@@ -20,12 +20,10 @@ model User {
   waxTypes     WaxType[]
   scents       Scent[]
   wicks        Wick[]
-  wickSticker  WickSticker?
   jarSizes     JarSize[]
   jarColors    JarColor[]
   jars         Jar[]
   stickers     Sticker[]
-  wickRules    WickRule[]
   recipes      CandleRecipe[]
   productions  ProductionRun[]
   sales        Sale[]
@@ -43,7 +41,6 @@ model JarSize {
   jars      Jar[]
   stickers  Sticker[]
   recipes   CandleRecipe[]
-  wickRules WickRule[]
 
   @@unique([userId, name])
 }
@@ -92,25 +89,15 @@ model Scent {
 }
 
 model Wick {
-  id        String     @id @default(cuid())
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  stockQty  Int        @default(0)
-  unitCost  Float      @default(0)
-  wickRules WickRule[]
-  updatedAt DateTime   @updatedAt
-
-  @@unique([userId, name])
-}
-
-model WickSticker {
   id        String   @id @default(cuid())
-  userId    String   @unique
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
   stockQty  Int      @default(0)
   unitCost  Float    @default(0)
   updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
 }
 
 model Jar {
@@ -141,21 +128,6 @@ model Sticker {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, sizeId, colorId])
-}
-
-// Wick rule per jar size: which wick type and how many per candle.
-// Wick sticker qty = wick qty.
-model WickRule {
-  id     String  @id @default(cuid())
-  userId String
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sizeId String
-  size   JarSize @relation(fields: [sizeId], references: [id], onDelete: Cascade)
-  wickId String
-  wick   Wick    @relation(fields: [wickId], references: [id], onDelete: Restrict)
-  qty    Int
-
-  @@unique([userId, sizeId])
 }
 
 // ---------- Recipes ----------

@@ -12,9 +12,6 @@ export default async function WicksPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Wicks</h1>
-      <p className="text-xs text-gray-500">
-        Wick consumption per candle is controlled by the wick rules in <a className="underline" href="/setup/wick-rules">Setup → Wick rules</a>.
-      </p>
 
       <div className="rounded border bg-white p-4">
         <div className="text-sm font-medium mb-2">Add wick type</div>

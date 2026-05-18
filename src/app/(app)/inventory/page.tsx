@@ -1,12 +1,11 @@
 import Link from "next/link";
 
 const TABS = [
-  { href: "/inventory/wax",         label: "Wax" },
-  { href: "/inventory/scents",      label: "Scents" },
-  { href: "/inventory/wicks",       label: "Wicks" },
-  { href: "/inventory/wick-stickers", label: "Wick Stickers" },
-  { href: "/inventory/jars",        label: "Jars" },
-  { href: "/inventory/stickers",    label: "Stickers" },
+  { href: "/inventory/wax",      label: "Wax" },
+  { href: "/inventory/scents",   label: "Scents" },
+  { href: "/inventory/wicks",    label: "Wicks" },
+  { href: "/inventory/jars",     label: "Jars" },
+  { href: "/inventory/stickers", label: "Stickers" },
 ];
 
 export default function InventoryHome() {

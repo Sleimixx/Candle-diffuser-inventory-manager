@@ -133,26 +133,8 @@ export async function deleteWick(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id"));
   const wick = await ownsOrThrow(await prisma.wick.findFirst({ where: { id, userId: user.id } }), "Wick");
-  const used = await prisma.wickRule.count({ where: { wickId: wick.id } });
-  if (used > 0) throw new Error("Wick is used by a wick rule.");
   await prisma.wick.delete({ where: { id: wick.id } });
   revalidatePath("/inventory/wicks");
-}
-
-export async function updateWickSticker(formData: FormData) {
-  const user = await requireUser();
-  const cost = n(formData.get("unitCost"));
-  const add  = Math.trunc(n(formData.get("addQty")));
-  await prisma.$transaction(async (tx) => {
-    let ws = await tx.wickSticker.findUnique({ where: { userId: user.id } });
-    if (!ws) ws = await tx.wickSticker.create({ data: { userId: user.id } });
-    await tx.wickSticker.update({ where: { id: ws.id }, data: { unitCost: cost } });
-    if (add !== 0) {
-      await tx.wickSticker.update({ where: { id: ws.id }, data: { stockQty: { increment: add } } });
-      await tx.stockAdjustment.create({ data: { userId: user.id, itemType: "wickSticker", itemId: ws.id, delta: add, reason: "restock" } });
-    }
-  });
-  revalidatePath("/inventory/wick-stickers");
 }
 
 export async function updateJar(formData: FormData) {

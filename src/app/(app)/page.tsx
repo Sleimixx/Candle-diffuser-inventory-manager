@@ -7,12 +7,11 @@ export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   const user = await requireUser();
-  const [waxes, jars, stickers, wicks, wickSticker, sales] = await Promise.all([
+  const [waxes, jars, stickers, wicks, sales] = await Promise.all([
     prisma.waxType.findMany({ where: { userId: user.id } }),
     prisma.jar.findMany({ where: { userId: user.id }, include: { size: true, color: true } }),
     prisma.sticker.findMany({ where: { userId: user.id }, include: { size: true, color: true } }),
     prisma.wick.findMany({ where: { userId: user.id } }),
-    prisma.wickSticker.findUnique({ where: { userId: user.id } }),
     prisma.sale.findMany({ where: { userId: user.id } }),
   ]);
 
@@ -25,7 +24,6 @@ export default async function Dashboard() {
   const lowJars   = jars.filter((j) => j.stockQty < LOW_STOCK.jarQty);
   const lowStk    = stickers.filter((s) => s.stockQty < LOW_STOCK.stickerQty);
   const lowWicks  = wicks.filter((w) => w.stockQty < LOW_STOCK.wickQty);
-  const lowWS     = wickSticker && wickSticker.stockQty < LOW_STOCK.wickStickerQty ? [wickSticker] : [];
 
   return (
     <div className="space-y-8">
@@ -52,18 +50,12 @@ export default async function Dashboard() {
                 ))}
               </ul>}
           </Card>
-          <Card title="Wicks / wick stickers below 20">
-            {lowWicks.length === 0 && lowWS.length === 0 ? <Empty /> :
+          <Card title="Wicks below 20">
+            {lowWicks.length === 0 ? <Empty /> :
               <ul className="text-sm space-y-1">
                 {lowWicks.map((w) => (
                   <li key={w.id} className="flex justify-between">
                     <span>{w.name}</span>
-                    <span className="text-red-600">{w.stockQty} pcs</span>
-                  </li>
-                ))}
-                {lowWS.map((w) => (
-                  <li key={w.id} className="flex justify-between">
-                    <span>Wick sticker</span>
                     <span className="text-red-600">{w.stockQty} pcs</span>
                   </li>
                 ))}
