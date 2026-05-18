@@ -13,14 +13,14 @@ const NAV = [
   { href: "/reports",   label: "Reports" },
 ];
 
-export default function NavSidebar({ username }: { username: string }) {
+export default function NavSidebar({ username, shopName }: { username: string; shopName: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
   return (
     <>
       <header className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between bg-white border-b border-gray-200 px-4 h-14">
-        <span className="font-semibold text-base">Candle Shop</span>
+        <span className="font-semibold text-base truncate">{shopName}</span>
         <button
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
@@ -53,7 +53,7 @@ export default function NavSidebar({ username }: { username: string }) {
           md:translate-x-0 md:static md:h-screen
         `}
       >
-        <div className="text-lg font-semibold mb-6 hidden md:block">Candle Shop</div>
+        <div className="text-lg font-semibold mb-6 hidden md:block truncate">{shopName}</div>
         <div className="h-14 md:hidden" />
         <nav className="flex flex-col gap-1 flex-1">
           {NAV.map((n) => {

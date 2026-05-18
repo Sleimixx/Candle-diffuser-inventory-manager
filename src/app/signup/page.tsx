@@ -14,6 +14,11 @@ export default function SignupPage() {
         <h1 className="text-xl font-semibold">Create your account</h1>
         <form action={action} className="space-y-3">
           <label className="block text-sm">
+            Shop name
+            <input name="shopName" required autoComplete="organization" className="block w-full mt-1 border rounded px-2 py-1" />
+            <span className="text-xs text-gray-500">What the business is called.</span>
+          </label>
+          <label className="block text-sm">
             Username
             <input name="username" required autoComplete="username" className="block w-full mt-1 border rounded px-2 py-1" />
             <span className="text-xs text-gray-500">3–32 chars, lowercase letters, digits, underscores.</span>

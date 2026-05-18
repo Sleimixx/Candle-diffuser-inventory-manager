@@ -13,10 +13,12 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
   const username = String(formData.get("username") || "").trim().toLowerCase();
   const email    = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
+  const shopName = String(formData.get("shopName") || "").trim();
 
   if (!USERNAME_RE.test(username)) return { error: "Username must be 3–32 lowercase letters, digits or underscores." };
   if (!EMAIL_RE.test(email))       return { error: "Enter a valid email address." };
   if (password.length < 8)         return { error: "Password must be at least 8 characters." };
+  if (!shopName)                   return { error: "Shop name is required." };
 
   const [existingU, existingE] = await Promise.all([
     prisma.user.findUnique({ where: { username } }),
@@ -28,7 +30,7 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
   const passwordHash = await hashPassword(password);
 
   const user = await prisma.user.create({
-    data: { username, email, passwordHash },
+    data: { username, email, passwordHash, shopName },
   });
 
   await createSession(user.id);
