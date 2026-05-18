@@ -5,13 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV = [
-  { href: "/",            label: "Dashboard" },
-  { href: "/inventory",   label: "Inventory" },
-  { href: "/recipes",     label: "Recipes" },
-  { href: "/produce",     label: "Produce" },
-  { href: "/sales",       label: "Sales" },
-  { href: "/reports",     label: "Reports" },
-  { href: "/setup",       label: "Setup" },
+  { href: "/",          label: "Dashboard" },
+  { href: "/inventory", label: "Inventory" },
+  { href: "/recipes",   label: "Recipes" },
+  { href: "/produce",   label: "Produce" },
+  { href: "/sales",     label: "Sales" },
+  { href: "/reports",   label: "Reports" },
 ];
 
 export default function NavSidebar({ username }: { username: string }) {

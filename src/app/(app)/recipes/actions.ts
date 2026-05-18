@@ -13,18 +13,18 @@ export async function upsertRecipe(formData: FormData) {
   const user = await requireUser();
   const id        = (formData.get("id") as string) || null;
   const name      = String(formData.get("name") || "").trim();
-  const sizeId    = String(formData.get("sizeId") || "");
-  const colorId   = String(formData.get("colorId") || "");
+  const jarId     = String(formData.get("jarId") || "");
+  const stickerId = String(formData.get("stickerId") || "");
   const salePrice = n(formData.get("salePrice"));
   const notes     = String(formData.get("notes") || "") || null;
 
-  if (!name || !sizeId || !colorId) throw new Error("Missing required fields.");
+  if (!name || !jarId || !stickerId) throw new Error("Missing required fields.");
 
-  const [size, color] = await Promise.all([
-    prisma.jarSize.findFirst({ where: { id: sizeId, userId: user.id } }),
-    prisma.jarColor.findFirst({ where: { id: colorId, userId: user.id } }),
+  const [jar, sticker] = await Promise.all([
+    prisma.jar.findFirst({ where: { id: jarId, userId: user.id } }),
+    prisma.sticker.findFirst({ where: { id: stickerId, userId: user.id } }),
   ]);
-  if (!size || !color) throw new Error("Invalid jar size or color.");
+  if (!jar || !sticker) throw new Error("Invalid jar or sticker.");
 
   const waxes: { waxId: string; grams: number }[] = [];
   const scents: { scentId: string; ml: number }[] = [];
@@ -35,7 +35,6 @@ export async function upsertRecipe(formData: FormData) {
     if (key.startsWith("scent_")) scents.push({ scentId: key.slice(6), ml:    v });
   }
 
-  // Sanity: all referenced waxes/scents belong to user.
   if (waxes.length) {
     const ok = await prisma.waxType.count({ where: { userId: user.id, id: { in: waxes.map((w) => w.waxId) } } });
     if (ok !== waxes.length) throw new Error("Unknown wax.");
@@ -52,14 +51,14 @@ export async function upsertRecipe(formData: FormData) {
       if (!existing) throw new Error("Recipe not found.");
       await tx.candleRecipe.update({
         where: { id: existing.id },
-        data: { name, sizeId, colorId, salePrice, notes },
+        data: { name, jarId, stickerId, salePrice, notes },
       });
       await tx.recipeWax.deleteMany({ where: { recipeId: existing.id } });
       await tx.recipeScent.deleteMany({ where: { recipeId: existing.id } });
       recipeId = existing.id;
     } else {
       const created = await tx.candleRecipe.create({
-        data: { userId: user.id, name, sizeId, colorId, salePrice, notes },
+        data: { userId: user.id, name, jarId, stickerId, salePrice, notes },
       });
       recipeId = created.id;
     }

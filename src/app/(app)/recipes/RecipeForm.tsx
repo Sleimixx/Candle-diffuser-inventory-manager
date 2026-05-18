@@ -6,8 +6,8 @@ import Link from "next/link";
 type Existing = {
   id: string;
   name: string;
-  sizeId: string;
-  colorId: string;
+  jarId: string;
+  stickerId: string;
   salePrice: number;
   notes: string | null;
   waxes: { waxId: string; grams: number }[];
@@ -16,17 +16,17 @@ type Existing = {
 
 export default async function RecipeForm({ existing }: { existing?: Existing }) {
   const user = await requireUser();
-  const [waxes, scents, sizes, colors] = await Promise.all([
+  const [waxes, scents, jars, stickers] = await Promise.all([
     prisma.waxType.findMany({ where: { userId: user.id }, orderBy: { name: "asc" } }),
     prisma.scent.findMany({ where: { userId: user.id }, orderBy: { name: "asc" } }),
-    prisma.jarSize.findMany({ where: { userId: user.id }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
-    prisma.jarColor.findMany({ where: { userId: user.id }, orderBy: { name: "asc" } }),
+    prisma.jar.findMany({ where: { userId: user.id }, orderBy: { name: "asc" } }),
+    prisma.sticker.findMany({ where: { userId: user.id }, orderBy: { name: "asc" } }),
   ]);
 
-  if (sizes.length === 0 || colors.length === 0) {
+  if (jars.length === 0 || stickers.length === 0) {
     return (
       <p className="text-sm text-gray-600">
-        Add at least one jar size and one color in <Link href="/setup" className="underline">Setup</Link> first.
+        Add at least one jar on <Link href="/inventory/jars" className="underline">Inventory → Jars</Link> and one sticker on <Link href="/inventory/stickers" className="underline">Inventory → Stickers</Link> first.
       </p>
     );
   }
@@ -48,19 +48,15 @@ export default async function RecipeForm({ existing }: { existing?: Existing }) 
           <input name="salePrice" type="number" step="0.01" defaultValue={existing?.salePrice ?? 0} className="block w-full mt-1 border rounded px-2 py-1" />
         </label>
         <label className="text-sm">
-          Jar size
-          <select name="sizeId" defaultValue={existing?.sizeId ?? sizes[0].id} className="block w-full mt-1 border rounded px-2 py-1">
-            {sizes.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          Jar
+          <select name="jarId" defaultValue={existing?.jarId ?? jars[0].id} className="block w-full mt-1 border rounded px-2 py-1">
+            {jars.map((j) => <option key={j.id} value={j.id}>{j.name}</option>)}
           </select>
         </label>
         <label className="text-sm">
-          Color / line
-          <select name="colorId" defaultValue={existing?.colorId ?? colors[0].id} className="block w-full mt-1 border rounded px-2 py-1">
-            {colors.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}{c.scentLine ? ` — ${c.scentLine}` : ""}
-              </option>
-            ))}
+          Sticker
+          <select name="stickerId" defaultValue={existing?.stickerId ?? stickers[0].id} className="block w-full mt-1 border rounded px-2 py-1">
+            {stickers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </label>
       </div>
@@ -115,9 +111,6 @@ export default async function RecipeForm({ existing }: { existing?: Existing }) 
       </label>
 
       <button className="px-4 py-2 rounded bg-black text-white text-sm">Save recipe</button>
-      <p className="text-xs text-gray-500">
-        Wick &amp; wick sticker quantities are decided automatically from the wick rule for the chosen jar size.
-      </p>
     </form>
   );
 }

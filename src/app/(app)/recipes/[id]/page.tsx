@@ -27,8 +27,8 @@ export default async function EditRecipePage({ params }: { params: Promise<{ id:
         existing={{
           id: r.id,
           name: r.name,
-          sizeId: r.sizeId,
-          colorId: r.colorId,
+          jarId: r.jarId,
+          stickerId: r.stickerId,
           salePrice: r.salePrice,
           notes: r.notes,
           waxes:  r.waxes.map((w) => ({ waxId: w.waxId, grams: w.grams })),

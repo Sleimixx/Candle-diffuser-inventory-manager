@@ -10,7 +10,7 @@ export default async function ProducePage() {
   const recipes = await prisma.candleRecipe.findMany({
     where: { userId: user.id },
     orderBy: [{ name: "asc" }],
-    include: { size: true, color: true },
+    include: { jar: true, sticker: true },
   });
   const runs = await prisma.productionRun.findMany({
     where: { userId: user.id },
@@ -30,7 +30,7 @@ export default async function ProducePage() {
             {recipes.length === 0 && <option value="">— no recipes —</option>}
             {recipes.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.name} ({r.size.name} {r.color.scentLine ?? r.color.name})
+                {r.name} ({r.jar.name} / {r.sticker.name})
               </option>
             ))}
           </select>

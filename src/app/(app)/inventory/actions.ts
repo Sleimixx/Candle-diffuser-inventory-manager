@@ -137,6 +137,21 @@ export async function deleteWick(formData: FormData) {
   revalidatePath("/inventory/wicks");
 }
 
+export async function createJar(formData: FormData) {
+  const user = await requireUser();
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return;
+  await prisma.jar.create({
+    data: {
+      userId: user.id,
+      name,
+      unitCost: n(formData.get("unitCost")),
+      stockQty: Math.trunc(n(formData.get("stockQty"))),
+    },
+  });
+  revalidatePath("/inventory/jars");
+}
+
 export async function updateJar(formData: FormData) {
   const user = await requireUser();
   const id   = String(formData.get("id"));
@@ -153,6 +168,31 @@ export async function updateJar(formData: FormData) {
   revalidatePath("/inventory/jars");
 }
 
+export async function deleteJar(formData: FormData) {
+  const user = await requireUser();
+  const id = String(formData.get("id"));
+  const jar = await ownsOrThrow(await prisma.jar.findFirst({ where: { id, userId: user.id } }), "Jar");
+  const used = await prisma.candleRecipe.count({ where: { jarId: jar.id } });
+  if (used > 0) throw new Error("Jar is used by a recipe.");
+  await prisma.jar.delete({ where: { id: jar.id } });
+  revalidatePath("/inventory/jars");
+}
+
+export async function createSticker(formData: FormData) {
+  const user = await requireUser();
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return;
+  await prisma.sticker.create({
+    data: {
+      userId: user.id,
+      name,
+      unitCost: n(formData.get("unitCost")),
+      stockQty: Math.trunc(n(formData.get("stockQty"))),
+    },
+  });
+  revalidatePath("/inventory/stickers");
+}
+
 export async function updateSticker(formData: FormData) {
   const user = await requireUser();
   const id   = String(formData.get("id"));
@@ -166,5 +206,15 @@ export async function updateSticker(formData: FormData) {
       await tx.stockAdjustment.create({ data: { userId: user.id, itemType: "sticker", itemId: existing.id, delta: add, reason: "restock" } });
     }
   });
+  revalidatePath("/inventory/stickers");
+}
+
+export async function deleteSticker(formData: FormData) {
+  const user = await requireUser();
+  const id = String(formData.get("id"));
+  const sticker = await ownsOrThrow(await prisma.sticker.findFirst({ where: { id, userId: user.id } }), "Sticker");
+  const used = await prisma.candleRecipe.count({ where: { stickerId: sticker.id } });
+  if (used > 0) throw new Error("Sticker is used by a recipe.");
+  await prisma.sticker.delete({ where: { id: sticker.id } });
   revalidatePath("/inventory/stickers");
 }

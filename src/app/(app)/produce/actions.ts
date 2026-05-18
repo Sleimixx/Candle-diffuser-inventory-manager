@@ -18,10 +18,10 @@ export async function runProduction(formData: FormData) {
     if (!r) throw new Error("Recipe not found");
 
     const [jar, sticker] = await Promise.all([
-      tx.jar.findUnique({ where: { userId_sizeId_colorId: { userId: user.id, sizeId: r.sizeId, colorId: r.colorId } } }),
-      tx.sticker.findUnique({ where: { userId_sizeId_colorId: { userId: user.id, sizeId: r.sizeId, colorId: r.colorId } } }),
+      tx.jar.findFirst({ where: { id: r.jarId, userId: user.id } }),
+      tx.sticker.findFirst({ where: { id: r.stickerId, userId: user.id } }),
     ]);
-    if (!jar || !sticker) throw new Error("Missing inventory rows for this size/color.");
+    if (!jar || !sticker) throw new Error("Missing jar or sticker for this recipe.");
 
     if (jar.stockQty     < quantity) throw new Error(`Not enough jars (need ${quantity}, have ${jar.stockQty}).`);
     if (sticker.stockQty < quantity) throw new Error(`Not enough stickers (need ${quantity}, have ${sticker.stockQty}).`);

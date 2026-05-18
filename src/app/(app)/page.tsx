@@ -9,8 +9,8 @@ export default async function Dashboard() {
   const user = await requireUser();
   const [waxes, jars, stickers, wicks, sales] = await Promise.all([
     prisma.waxType.findMany({ where: { userId: user.id } }),
-    prisma.jar.findMany({ where: { userId: user.id }, include: { size: true, color: true } }),
-    prisma.sticker.findMany({ where: { userId: user.id }, include: { size: true, color: true } }),
+    prisma.jar.findMany({ where: { userId: user.id } }),
+    prisma.sticker.findMany({ where: { userId: user.id } }),
     prisma.wick.findMany({ where: { userId: user.id } }),
     prisma.sale.findMany({ where: { userId: user.id } }),
   ]);
@@ -66,7 +66,7 @@ export default async function Dashboard() {
               <ul className="text-sm space-y-1">
                 {lowJars.map((j) => (
                   <li key={j.id} className="flex justify-between">
-                    <span>{j.size.name} {j.color.name}{j.color.scentLine ? ` — ${j.color.scentLine}` : ""}</span>
+                    <span>{j.name}</span>
                     <span className="text-red-600">{j.stockQty} pcs</span>
                   </li>
                 ))}
@@ -77,7 +77,7 @@ export default async function Dashboard() {
               <ul className="text-sm space-y-1">
                 {lowStk.map((s) => (
                   <li key={s.id} className="flex justify-between">
-                    <span>{s.size.name} {s.color.name}{s.color.scentLine ? ` — ${s.color.scentLine}` : ""}</span>
+                    <span>{s.name}</span>
                     <span className="text-red-600">{s.stockQty} pcs</span>
                   </li>
                 ))}
