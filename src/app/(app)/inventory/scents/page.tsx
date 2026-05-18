@@ -1,3 +1,4 @@
+import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createScent, updateScent, deleteScent } from "../actions";
 import { money, num } from "@/lib/money";
@@ -5,7 +6,8 @@ import { money, num } from "@/lib/money";
 export const dynamic = "force-dynamic";
 
 export default async function ScentsPage() {
-  const scents = await prisma.scent.findMany({ orderBy: { name: "asc" } });
+  const user = await requireUser();
+  const scents = await prisma.scent.findMany({ where: { userId: user.id }, orderBy: { name: "asc" } });
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Scents (ml)</h1>

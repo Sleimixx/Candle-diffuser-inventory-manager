@@ -1,13 +1,34 @@
+import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateSticker } from "../actions";
-import { ALL_COLORS, ALL_SIZES, COLOR_LINES, LOW_STOCK, SIZE_LABEL } from "@/lib/constants";
+import { LOW_STOCK } from "@/lib/constants";
 import { money } from "@/lib/money";
+import { ensureStickerMatrix } from "@/lib/matrix";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function StickersPage() {
-  const stickers = await prisma.sticker.findMany();
-  const byKey = new Map(stickers.map((s) => [`${s.size}-${s.color}`, s]));
+  const user = await requireUser();
+  await ensureStickerMatrix(user.id);
+  const [sizes, colors, stickers] = await Promise.all([
+    prisma.jarSize.findMany({ where: { userId: user.id }, orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
+    prisma.jarColor.findMany({ where: { userId: user.id }, orderBy: { name: "asc" } }),
+    prisma.sticker.findMany({ where: { userId: user.id } }),
+  ]);
+
+  if (sizes.length === 0 || colors.length === 0) {
+    return (
+      <div className="space-y-3">
+        <h1 className="text-xl font-semibold">Stickers</h1>
+        <p className="text-sm text-gray-600">
+          Add at least one jar size and one color in <Link href="/setup" className="underline">Setup</Link> first.
+        </p>
+      </div>
+    );
+  }
+
+  const byKey = new Map(stickers.map((s) => [`${s.sizeId}|${s.colorId}`, s]));
 
   return (
     <div className="space-y-4">
@@ -17,26 +38,27 @@ export default async function StickersPage() {
         <thead className="text-left text-gray-600 border-b">
           <tr>
             <th className="p-3">Color (Line)</th>
-            {ALL_SIZES.map((s) => <th key={s} className="p-3">{SIZE_LABEL[s]}</th>)}
+            {sizes.map((s) => <th key={s.id} className="p-3">{s.name}</th>)}
           </tr>
         </thead>
         <tbody>
-          {ALL_COLORS.map((c) => (
-            <tr key={c} className="border-b last:border-0">
+          {colors.map((c) => (
+            <tr key={c.id} className="border-b last:border-0">
               <td className="p-3">
                 <div className="flex items-center gap-2">
-                  <span className="inline-block w-3 h-3 rounded-full" style={{ background: COLOR_LINES[c].hex }} />
+                  <span className="inline-block w-3 h-3 rounded-full" style={{ background: c.hex }} />
                   <div>
-                    <div>{COLOR_LINES[c].color}</div>
-                    <div className="text-xs text-gray-500">{COLOR_LINES[c].line}</div>
+                    <div>{c.name}</div>
+                    {c.scentLine && <div className="text-xs text-gray-500">{c.scentLine}</div>}
                   </div>
                 </div>
               </td>
-              {ALL_SIZES.map((s) => {
-                const st = byKey.get(`${s}-${c}`)!;
+              {sizes.map((s) => {
+                const st = byKey.get(`${s.id}|${c.id}`);
+                if (!st) return <td key={s.id} className="p-3 text-xs text-gray-400">—</td>;
                 const low = st.stockQty < LOW_STOCK.stickerQty;
                 return (
-                  <td key={s} className="p-3 align-top">
+                  <td key={s.id} className="p-3 align-top">
                     <div className={`text-sm ${low ? "text-red-600 font-medium" : ""}`}>{st.stockQty} pcs</div>
                     <div className="text-xs text-gray-500 mb-1">{money(st.unitCost)} each</div>
                     <form action={updateSticker} className="flex gap-1 items-center">
