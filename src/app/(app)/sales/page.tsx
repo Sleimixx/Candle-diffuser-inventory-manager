@@ -32,7 +32,7 @@ export default async function SalesPage() {
       <div className="rounded border bg-white p-4">
         <h2 className="text-sm font-medium mb-2">Record a sale</h2>
         {available.length === 0 ? (
-          <p className="text-sm text-gray-500">No finished candles available. Produce some first.</p>
+          <p className="text-sm text-gray-500">Nothing available to sell. Produce some first.</p>
         ) : (
           <form action={recordSale} className="flex flex-wrap gap-2 items-end">
             <label className="text-sm">
@@ -64,7 +64,7 @@ export default async function SalesPage() {
         <table className="w-full text-sm bg-white border rounded min-w-[40rem]">
           <thead className="text-left text-gray-600 border-b">
             <tr>
-              <th className="p-3">When</th>
+              <th className="p-3">Date</th>
               <th className="p-3">Recipe</th>
               <th className="p-3">Qty</th>
               <th className="p-3">Unit price</th>

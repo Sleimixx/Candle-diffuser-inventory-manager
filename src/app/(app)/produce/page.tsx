@@ -47,7 +47,7 @@ export default async function ProducePage() {
         <table className="w-full text-sm bg-white border rounded min-w-[36rem]">
           <thead className="text-left text-gray-600 border-b">
             <tr>
-              <th className="p-3">When</th>
+              <th className="p-3">Date</th>
               <th className="p-3">Recipe</th>
               <th className="p-3">Qty</th>
               <th className="p-3">Sold</th>

@@ -21,7 +21,7 @@ export default function SignupPage() {
           <label className="block text-sm">
             Username
             <input name="username" required autoComplete="username" className="block w-full mt-1 border rounded px-2 py-1" />
-            <span className="text-xs text-gray-500">3–32 chars, lowercase letters, digits, underscores.</span>
+            <span className="text-xs text-gray-500">3–32 chars, lowercase letters, digits, dots or underscores.</span>
           </label>
           <label className="block text-sm">
             Email

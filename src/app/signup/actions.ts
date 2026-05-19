@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export type SignupState = { error?: string };
 
-const USERNAME_RE = /^[a-z0-9_]{3,32}$/;
+const USERNAME_RE = /^[a-z0-9._]{3,32}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function signupAction(_prev: SignupState, formData: FormData): Promise<SignupState> {
@@ -15,7 +15,7 @@ export async function signupAction(_prev: SignupState, formData: FormData): Prom
   const password = String(formData.get("password") || "");
   const shopName = String(formData.get("shopName") || "").trim();
 
-  if (!USERNAME_RE.test(username)) return { error: "Username must be 3–32 lowercase letters, digits or underscores." };
+  if (!USERNAME_RE.test(username)) return { error: "Username must be 3–32 lowercase letters, digits, dots or underscores." };
   if (!EMAIL_RE.test(email))       return { error: "Enter a valid email address." };
   if (password.length < 8)         return { error: "Password must be at least 8 characters." };
   if (!shopName)                   return { error: "Shop name is required." };
