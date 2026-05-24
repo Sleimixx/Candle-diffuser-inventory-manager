@@ -2,8 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Candle Shop Inventory",
-  description: "Inventory, production and sales for the candle shop.",
+  title: "Inventory & Sales Manager",
+  description: "Inventory, production and sales management for any business.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,37 +1,21 @@
-# Candle Shop Inventory Manager
+# Inventory & Sales Manager
 
-Inventory, production, and sales tracker for a small candle shop.
+Inventory, production, and sales tracker for any small business.
 
 ## Stack
 - Next.js 15 (App Router) + TypeScript
 - Tailwind CSS
-- Prisma + Postgres (Supabase recommended)
+- Prisma + Postgres (Supabase)
 - Server actions for all mutations
 - Deploys to Vercel
 
-## Domain rules
-- **5 wax types**: Beeswax, Soy Wax, Stearic Acid, Coconut Wax, Paraffin (optional per recipe).
-- **Scents** are added by the user; measured in ml; recipes can blend multiple scents.
-- **Wicks** (Type 1 / Type 2) and **Wick Stickers** (single size) are consumed by these hard-coded rules:
-  - Small jar  → 1 × Wick Type 1 + 1 × Wick Sticker
-  - Medium jar → 2 × Wick Type 2 + 2 × Wick Stickers
-  - Large jar  → 3 × Wick Type 2 + 3 × Wick Stickers
-- **Jars / Stickers** come in 3 sizes × 7 colors, each color tied to one scent line (strict pairing):
-  - Purple → Lavender Bliss
-  - Light Blue → Tranquil Jasmine
-  - Red → Vanilla Bourbon
-  - Green → Pine and Cinnamon
-  - Yellow → Pomelo Paradise
-  - Grey → Sacred Oud
-  - Pink → Silk n Strawberry
-- A **recipe** is identified by (jar size, color). Producing a recipe atomically deducts wax, scents, jar, sticker, wicks, and wick stickers. Production records a **COGS snapshot** so reports stay correct when costs change later.
-- **Sales** are recorded against a production run. Net income = revenue − snapshot COGS.
-
-## Low-stock alerts
-- Jars / stickers: below 20 pcs
-- Wicks / wick stickers: below 20 pcs
-- Wax: below 10 000 g (10 kg)
-- Scents: no alert
+## Features
+- **Multi-tenant** — each user signs up with a shop name and manages their own data.
+- **User-defined categories** — create categories with any unit (g, ml, pcs, ft, etc.) and add items to each.
+- **Recipes** — combine items from any category with a quantity per unit produced.
+- **Production** — atomically deducts all recipe items and snapshots COGS per unit.
+- **Sales** — record against a production run; tracks revenue and frozen COGS.
+- **Reports** — date-range filter with produced / sold / revenue / net totals.
 
 ## Getting started
 
@@ -44,20 +28,18 @@ cp .env.example .env
 #   → set DATABASE_URL, DIRECT_URL, and AUTH_SECRET (any long random string)
 
 # 3. Push schema
-npm run db:push   # v2 wipes any v1 test data — accept --accept-data-loss when prompted
+npm run db:push
 
 # 4. Run dev server
 npm run dev
 ```
 
-> **v2 note:** signup creates a per-user starter product structure (sizes, colors, wicks, wick rules). After deploying v2, sign up to start fresh — previous v1 test data is wiped by the schema change.
-
-Open http://localhost:3000.
+Open http://localhost:3000 and sign up.
 
 ## Pages
-- `/` — Dashboard with totals + low-stock alerts
-- `/inventory` — Wax, Scents, Wicks, Wick Stickers, Jars, Stickers (CRUD + restock)
+- `/` — Dashboard with revenue / COGS / profit / margin
+- `/inventory` — Categories and items (CRUD + restock)
 - `/recipes` — Recipe list + builder (live cost preview)
 - `/produce` — Log a production run; deducts stock atomically
 - `/sales` — Record a sale from a production run
-- `/reports` — Date-range filter, totals & per-recipe breakdown
+- `/reports` — Date-range filter with totals
