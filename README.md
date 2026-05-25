@@ -17,24 +17,6 @@ Inventory, production, and sales tracker for any small business.
 - **Sales** — record against a production run; tracks revenue and frozen COGS.
 - **Reports** — date-range filter with produced / sold / revenue / net totals.
 
-## Getting started
-
-```bash
-# 1. Install deps
-npm install
-
-# 2. Configure Supabase / Postgres
-cp .env.example .env
-#   → set DATABASE_URL, DIRECT_URL, and AUTH_SECRET (any long random string)
-
-# 3. Push schema
-npm run db:push
-
-# 4. Run dev server
-npm run dev
-```
-
-Open http://localhost:3000 and sign up.
 
 ## Pages
 - `/` — Dashboard with revenue / COGS / profit / margin
