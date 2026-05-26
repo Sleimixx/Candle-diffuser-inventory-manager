@@ -2,6 +2,7 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { recordSale } from "./actions";
 import { money } from "@/lib/money";
+import InvoiceButton from "./InvoiceButton";
 
 export const dynamic = "force-dynamic";
 
@@ -71,10 +72,11 @@ export default async function SalesPage() {
               <th className="p-3">Revenue</th>
               <th className="p-3">COGS</th>
               <th className="p-3">Profit</th>
+              <th className="p-3"></th>
             </tr>
           </thead>
           <tbody>
-            {sales.length === 0 && <tr><td colSpan={7} className="p-3 text-gray-500">No sales yet.</td></tr>}
+            {sales.length === 0 && <tr><td colSpan={8} className="p-3 text-gray-500">No sales yet.</td></tr>}
             {sales.map((s) => {
               const rev = s.unitPrice * s.quantity;
               const cogs = s.cogsPerUnit * s.quantity;
@@ -87,6 +89,19 @@ export default async function SalesPage() {
                   <td className="p-3">{money(rev)}</td>
                   <td className="p-3">{money(cogs)}</td>
                   <td className={`p-3 ${rev - cogs < 0 ? "text-red-600" : ""}`}>{money(rev - cogs)}</td>
+                  <td className="p-3">
+                    <InvoiceButton
+                      sale={{
+                        id: s.id,
+                        recipeName: s.production.recipe.name,
+                        quantity: s.quantity,
+                        unitPrice: s.unitPrice,
+                        cogsPerUnit: s.cogsPerUnit,
+                        soldAt: s.soldAt.toISOString(),
+                      }}
+                      shopName={user.shopName || user.username}
+                    />
+                  </td>
                 </tr>
               );
             })}
