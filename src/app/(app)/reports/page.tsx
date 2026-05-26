@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { money, num } from "@/lib/money";
+import DownloadReportButton from "./DownloadReportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,19 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         <label className="text-sm">From <input name="from" type="date" defaultValue={from.toISOString().slice(0, 10)} className="block border rounded px-2 py-1" /></label>
         <label className="text-sm">To   <input name="to"   type="date" defaultValue={to.toISOString().slice(0, 10)}   className="block border rounded px-2 py-1" /></label>
         <button className="px-3 py-1 rounded bg-black text-white text-sm">Filter</button>
+        <DownloadReportButton
+          data={{
+            from: from.toISOString().slice(0, 10),
+            to: to.toISOString().slice(0, 10),
+            produced,
+            sold: soldQty,
+            revenue,
+            cogs,
+            profit,
+            margin,
+            shopName: user.shopName || user.username,
+          }}
+        />
       </form>
 
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
